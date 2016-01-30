@@ -1,0 +1,163 @@
+﻿@model IEnumerable<MVCDisplayWebGrid.Models.Employee>
+<script src="~/Scripts/jquery-1.10.2.min.js"></script>
+
+<script type="text/javascript">
+    $(function () {
+        $('.edit-mode').hide();
+        $('.edit-user, .cancel-user').on('click', function () {
+            var tr = $(this).parents('tr:first');
+            tr.find('.edit-mode, .display-mode').toggle();
+        });
+        $('.save-user').on('click', function () {
+            var tr = $(this).parents('tr:first');
+            var EmpID = tr.find("#EmpId").html();
+            var EmpName = tr.find("#Name").val();
+            var EmpDesignation = tr.find("#Designation").val();
+            var EmpCity = tr.find("#City").val();
+            var EmpState = tr.find("#State").val();
+            var EmpZip = tr.find("#Zip").val();
+
+            //Creating Employee JSON object
+            var EmployeeModel =
+            {
+                "Id": EmpID,
+                "Name": EmpName,
+                "Designation": EmpDesignation,
+                "City": EmpCity,
+                "State": EmpState,
+                "Zip": EmpZip
+            };
+            //Posting Employee object to controller's Update action method 
+            $.ajax({
+                url: '/Employee/Update',
+                data: JSON.stringify(EmployeeModel),
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    tr.find('.edit-mode, .display-mode').toggle();
+                    alert('Record updated Successfully!!');
+                }
+            });
+
+        });
+
+        $('.edit-user').on('click', function () {
+            var tr = $(this).parents('tr:first');
+            var EmpID = tr.find("#EmpId").html();
+            var EmpName = tr.find("#Name").val();
+            var EmpDesignation = tr.find("#Designation").val();
+            var EmpCity = tr.find("#City").val();
+            var EmpState = tr.find("#State").val();
+            var EmpZip = tr.find("#Zip").val();
+
+            tr.find("#lblName").text(EmpName);
+            tr.find("#lblDesignation").text(EmpDesignation);
+            tr.find("#lblCity").text(EmpCity);
+            tr.find("#lblState").text(EmpState);
+            tr.find("#lblZip").text(EmpZip);
+        });
+    })
+</script>
+
+<style type="text/css">
+    .edit-mode {}
+    .edit-user {}
+    .edit-user display-mode {}
+    .save-user edit-mode {}
+    .display-mode {}
+    .cancel-user {}
+
+    .webgrid-table {
+        font-family: Arial,Helvetica,sans-serif;
+        font-size: 14px;
+        font-weight: normal;
+        width: 800px;
+        display: table;
+        border-collapse: collapse;
+        border: solid px #C5C5C5;
+        background-color: white;
+    }
+
+        .webgrid-table td, th {
+            border: 1px solid #C5C5C5;
+            padding: 3px 7px 2px;
+        }
+
+    .webgrid-header, .webgrid-header a {
+        background-color: #0094ff;
+        color: #ffffff;
+        text-align: left;
+        text-decoration: none;
+    }
+
+    .webgrid-footer {
+    }
+
+    .webgrid-row-style {
+        padding: 3px 7px 2px;
+    }
+
+    .webgrid-alternating-row {
+        background-color: azure;
+        padding: 3px 7px 2px;
+    }
+
+    .col1Width {
+        width: 55px;
+    }
+
+    .col2Width {
+        width: 100px;
+    }
+    .col3Width {
+        width: 520px;
+    }
+</style>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+
+<h2>Inline Editing in WebGrid</h2>
+
+@{
+    ViewBag.Title = "Index";
+    var grid = new WebGrid(source: Model, canPage: true, rowsPerPage: 10);
+    grid.Pager(WebGridPagerModes.All);
+}
+
+<div id="gridContent" style="font-family: Arial; padding: 20px;">
+    @grid.GetHtml(tableStyle: "webgrid-table",
+    headerStyle: "webgrid-header",
+    footerStyle: "webgrid-footer",
+    alternatingRowStyle: "webgrid-alternating-row",
+    selectedRowStyle: "webgrid-selected-row",
+    rowStyle: "webgrid-row-style",
+    mode: WebGridPagerModes.All,
+    columns: grid.Columns(
+        grid.Column("ID", format: @<text><span class="display-mode">@item.ID</span><label id="EmpId" class="edit-mode">@item.Id</label></text>,
+                    style: "col1Width" ),
+        grid.Column("Name", "Name", format: @<text><span class="display-mode"><label id="lblName">@item.Name</label></span>
+        <input type="text" id="Name" value="@item.Name" class="edit-mode"/></text>, style: "col2Width"),
+
+         grid.Column("Designation", "Designation", format: @<text> <span class="display-mode"><label id="lblDesignation">@item.Designation</label></span>
+        <input type="text" id="Designation" value="@item.Designation" class="edit-mode" /></text>, style: "col2Width"),
+
+        grid.Column("City", "Designation", format: @<text> <span class="display-mode"><label id="lblCity">@item.City</label></span>
+        <input type="text" id="City" value="@item.City" class="edit-mode" /></text>, style: "col2Width"),
+
+        grid.Column("State", "Designation", format: @<text> <span class="display-mode"><label id="lblState">@item.State</label></span>
+        <input type="text" id="State" value="@item.State" class="edit-mode" /></text>, style: "col2Width"),
+
+        grid.Column("Zip", "Zip", format: @<text> <span class="display-mode"><label id="lblZip">@item.Zip</label></span>
+        <input type="text" id="Zip" value="@item.Zip" class="edit-mode" /></text>, style: "col2Width"),
+
+
+    grid.Column("Action", format: @<text>
+        <button class="edit-user display-mode">Edit</button>
+        <button class="save-user edit-mode">Save</button>
+        <button class="cancel-user edit-mode">Cancel</button>
+    </text>, style: "col3Width", canSort: false)
+            ))
+</div>
